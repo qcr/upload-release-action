@@ -166,7 +166,7 @@ async function run(): Promise<void> {
         core.setFailed('No files matching the glob pattern found.')
       }
     } else {
-      for (const file of files) {
+      for (const file of JSON.parse(files)) {
         const asset_name = path.basename(file)
         const asset_download_url = await upload_to_release(
           release,

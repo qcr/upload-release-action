@@ -2369,7 +2369,7 @@ function run() {
                 }
             }
             else {
-                for (const file of files) {
+                for (const file of JSON.parse(files)) {
                     const asset_name = path.basename(file);
                     const asset_download_url = yield upload_to_release(release, file, asset_name, tag, overwrite, octokit);
                     core.setOutput('browser_download_url', asset_download_url);
