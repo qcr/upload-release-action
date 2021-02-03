@@ -126,7 +126,7 @@ async function run(): Promise<void> {
   try {
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
     const token = core.getInput('repo_token', {required: true})
-    const file = core.getInput('file', {required: true})
+    const files = core.getInput('files', {required: true})
     const tag = core
       .getInput('tag', {required: true})
       .replace('refs/tags/', '')
@@ -148,9 +148,9 @@ async function run(): Promise<void> {
     )
 
     if (file_glob) {
-      const files = glob.sync(file)
-      if (files.length > 0) {
-        for (const file of files) {
+      const fileList = glob.sync(files)
+      if (fileList.length > 0) {
+        for (const file of fileList) {
           const asset_name = path.basename(file)
           const asset_download_url = await upload_to_release(
             release,
@@ -166,19 +166,18 @@ async function run(): Promise<void> {
         core.setFailed('No files matching the glob pattern found.')
       }
     } else {
-      const asset_name =
-        core.getInput('asset_name') !== ''
-          ? core.getInput('asset_name').replace(/\$tag/g, tag)
-          : path.basename(file)
-      const asset_download_url = await upload_to_release(
-        release,
-        file,
-        asset_name,
-        tag,
-        overwrite,
-        octokit
-      )
-      core.setOutput('browser_download_url', asset_download_url)
+      for (const file of files) {
+        const asset_name = path.basename(file)
+        const asset_download_url = await upload_to_release(
+          release,
+          file,
+          asset_name,
+          tag,
+          overwrite,
+          octokit
+        )
+        core.setOutput('browser_download_url', asset_download_url)
+      }
     }
   } catch (error) {
     core.setFailed(error.message)

@@ -8,14 +8,12 @@ inputs:
   repo_token:
     description: 'GitHub token.'
     required: true
-  file:
+  files:
     description: 'Local file to upload.'
     required: true
   tag:
     description: 'Tag to use as a release.'
     required: true
-  asset_name:
-    description: 'Name of the asset. When not provided will use the file name. Unused if file_glob is set to "true".'
   overwrite:
     description: 'Overwrite the release in case it already exists.'
   file_glob:
