@@ -2355,14 +2355,15 @@ function run() {
             const body = core.getInput('body');
             const octokit = github.getOctokit(token);
             const release = yield get_release_by_tag(tag, prerelease, release_name, body, octokit);
+            const asset_download_urls = [];
             if (file_glob) {
                 const fileList = glob.sync(files);
                 if (fileList.length > 0) {
                     for (const file of fileList) {
                         const asset_name = path.basename(file);
-                        const asset_download_url = yield upload_to_release(release, file, asset_name, tag, overwrite, octokit);
-                        core.setOutput('browser_download_url', asset_download_url);
+                        asset_download_urls.push(yield upload_to_release(release, file, asset_name, tag, overwrite, octokit));
                     }
+                    core.setOutput('browser_download_urls', asset_download_urls);
                 }
                 else {
                     core.setFailed('No files matching the glob pattern found.');
@@ -2371,9 +2372,9 @@ function run() {
             else {
                 for (const file of JSON.parse(files)) {
                     const asset_name = path.basename(file);
-                    const asset_download_url = yield upload_to_release(release, file, asset_name, tag, overwrite, octokit);
-                    core.setOutput('browser_download_url', asset_download_url);
+                    asset_download_urls.push(yield upload_to_release(release, file, asset_name, tag, overwrite, octokit));
                 }
+                core.setOutput('browser_download_urls', asset_download_urls);
             }
         }
         catch (error) {

@@ -147,12 +147,33 @@ async function run(): Promise<void> {
       octokit
     )
 
+    const asset_download_urls = []
+
     if (file_glob) {
       const fileList = glob.sync(files)
       if (fileList.length > 0) {
         for (const file of fileList) {
           const asset_name = path.basename(file)
-          const asset_download_url = await upload_to_release(
+          asset_download_urls.push(
+            await upload_to_release(
+              release,
+              file,
+              asset_name,
+              tag,
+              overwrite,
+              octokit
+            )
+          )
+        }
+        core.setOutput('browser_download_urls', asset_download_urls)
+      } else {
+        core.setFailed('No files matching the glob pattern found.')
+      }
+    } else {
+      for (const file of JSON.parse(files)) {
+        const asset_name = path.basename(file)
+        asset_download_urls.push(
+          await upload_to_release(
             release,
             file,
             asset_name,
@@ -160,24 +181,9 @@ async function run(): Promise<void> {
             overwrite,
             octokit
           )
-          core.setOutput('browser_download_url', asset_download_url)
-        }
-      } else {
-        core.setFailed('No files matching the glob pattern found.')
-      }
-    } else {
-      for (const file of JSON.parse(files)) {
-        const asset_name = path.basename(file)
-        const asset_download_url = await upload_to_release(
-          release,
-          file,
-          asset_name,
-          tag,
-          overwrite,
-          octokit
         )
-        core.setOutput('browser_download_url', asset_download_url)
       }
+      core.setOutput('browser_download_urls', asset_download_urls)
     }
   } catch (error) {
     core.setFailed(error.message)
